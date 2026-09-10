@@ -1,0 +1,22 @@
+# 📝 Statement of Work (SOW) - YW Vineyard Tracker
+
+## 1. Project Achtergrond & Doelstelling
+De **YW Vineyard Tracker** is een interactieve, gegamificeerde React.js single-page webapplicatie [from our past conversations, 0.14.1]. Het doel is om de Young Women te motiveren hun doelen uit het officiële *Personal Development: Youth Guidebook* te behalen. De app vertaalt scriptural principes (de Tien Maagden en de onvruchtbare vijgenboom) naar spelmechanics, met als kerndoel het versterken van onderlinge zorg (ministering) en actieve deelname.
+
+## 2. Project Scope & Functionaliteiten (V1.0)
+*   **Persistente Doelen & Vluchtige Rapporten:** Gebruikers stellen eenmalig 6-maandelijkse doelen in voor de 4 groei-gebieden (Spiritueel, Sociaal, Intellectueel, Fysiek). Dagelijkse voortgangslinks naar Google Docs/bestanden zijn vluchtig en worden elke nacht overschreven voor optimale privacy (`volatile state management`).
+*   **Gegamificeerde Economie:** Integratie van een actieve olijflamp (olie-verbruik), een veilige olie-reserve, Talentdruppels (Rood, Blauw, Goud), en uiterst zeldzame Echte Talenten.
+*   **Zusterschap & Samenwerking (De Sleutel-regel):** Activiteitenpassen zijn vervangen door **Sleutels (Keys)**. Een groepsactiviteit breekt pas open wanneer *iedereen* in de klas minimaal 1 sleutel heeft bemachtigd. Dit dwingt actieve samenwerking af via het ingebouwde Peer-to-Peer (P2P) Support-prikbord.
+*   **Admin Review-notificaties:** Een beheerpaneel voor de president om ingezonden rapportages te keuren. Bij goedkeuring valt er 100% gegarandeerd een buit (70% kans op Olie-bonus, 30% kans op Talentdruppels/Echte Talenten). Bij afkeuring worden de geclaimde druppels direct van de olijflamp afgetrokken en krijgt het lid een foutmelding op haar scherm.
+
+## 3. Technische Randvoorwaarden & Architectuur
+*   **Framework:** React.js (Vite SPA) [from our past conversations, 0.14.1]
+*   **Styling:** Tailwind CSS V4 (Responsive mobiel-eerst grid) [from our past conversations, 0.14.1, 0.15.1]
+*   **State Management:** React Context API & Hooks (Gesplitste clean-architecture om Vite Fast Refresh fouten te voorkomen) [from our past conversations, 0.14.1].
+*   **Opslaglocatie:** Volledig geïnstalleerd en gedraaid vanaf de lokale **G-schijf** om de C-schijf te ontlasten.
+*   **Versiebeheer:** Git gekoppeld aan een private GitHub Repository.
+
+## 4. Deliverables & Toekomstige Uitbreidingen (Fase 2)
+*   **Goudraffinaderij (`GoldRefinery.jsx`):** Handmatige smeltoven om Talentdruppels om te zetten in echte Sleutels.
+*   **Zondagsverslaggeving:** Invoermogelijkheden voor kerkbezoek en missionaire doelen (zoals het meenemen van een niet-lid vriend(in) voor Gouddruppels).
+*   **Young Men PvP-modus:** Uitbreiding van het systeem naar de quorums voor vriendschappelijke competities.

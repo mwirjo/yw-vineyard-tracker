@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 const { getDB } = require('../config/db');
 
 const createApprovalReward = () => {
@@ -118,5 +119,26 @@ const applyApprovalReward = (reward) => {
 
   return { update: { $inc: update.$inc }, reward: update.reward };
 };
+const deleteReport = async (req, res) => {
+  try {
+    const db = getDB();
+    const { id } = req.params;
 
-module.exports = { reviewReport };
+    const filter = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { reportId: id };
+    const result = await db.collection('reports').deleteOne(filter);
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, error: 'Report not found.' });
+    }
+
+    res.status(200).json({ success: true, message: 'Report deleted successfully.' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+module.exports = {
+  reviewReport,
+  deleteReport
+};
+

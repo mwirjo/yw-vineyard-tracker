@@ -78,6 +78,10 @@ The completed backend should:
 
 These items can be included in later phases.
 
+### W01 learning activity boundary
+
+The W01 activity focuses on building and testing the Node.js web service locally. It does not require a Render deployment for completion. Render deployment is a separate hosting and deployment task that may be completed later when the API needs to be publicly accessible.
+
 ## 5. Backend Functions
 
 ### 5.1 Server health check
@@ -332,6 +336,8 @@ Future backend phases may include:
 - peer-to-peer support data
 - key and group-activity APIs
 - production deployment to Render
+
+Render is therefore recorded as future deployment work, not as a required part of the W01 local Web Services and Node Architecture activity.
 
 ## Conclusion
 

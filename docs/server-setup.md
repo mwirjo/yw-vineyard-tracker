@@ -365,6 +365,10 @@ This confirms that the backend found the pending report and updated its status i
 
 The backend is a reproducible Node.js, Express, and MongoDB Atlas service inside the YW Vineyard Tracker project. This setup satisfies the CSE 341 objectives for secure database integration, API architecture, GET requests, query parameters, headers, REST client testing, and Node.js debugging.
 
+## Deployment Note
+
+The W01 learning activity is completed through local Node.js development, MongoDB Atlas connection, and REST client testing. Publishing the API to Render is not required for this activity. Render is an optional future deployment step used when the backend needs a public URL or when the course deployment instructions specifically require it.
+
 ## Completed Objectives
 
 ### 1. Secure API and Database Integration

@@ -1,344 +1,267 @@
-# YW Vineyard Tracker Backend Statement of Work
+YW Vineyard Tracker Backend Statement of Work
+=============================================
 
-## 1. Project Context
+1\. Project Context
+-------------------
 
-The YW Vineyard Tracker is a React application designed to encourage Young Women to set goals, work on personal development, support one another, and participate in shared activities.
+The YW Vineyard Tracker is a full-stack application (React frontend, Node.js/Express backend, MongoDB database) designed to encourage Young Women to set goals, work on personal development, support one another, and participate in shared activities.
 
-The application uses a game-inspired resource system based on the project Statement of Work:
+The application uses a game-inspired resource system:
 
-- active lamp oil and an oil reserve
-- red, blue, and gold talent droplets
-- rare real talents
-- activity passes and keys
-- daily progress reports
-- administrative review of submitted reports
+*   active lamp oil (oilInLamp) and an oil reserve (oilReserve)
+    
+*   red, blue, and gold talent droplets (talentDroplets)
+    
+*   rare real talents (talents)
+    
+*   activity passes (activityPasses) and keys
+    
+*   daily progress reports
+    
+*   administrative review of submitted reports
+    
 
-The frontend provides the user experience. The backend provides the secure data and API layer that stores member state, receives reports, processes administrative decisions, and returns information to the frontend.
+The frontend provides the user experience. The backend provides the secure, RESTful API layer that stores member state, receives reports, processes administrative decisions, and returns structured data to the frontend.
 
-## 2. Purpose
+2\. Purpose
+-----------
 
-The purpose of this work is to build a maintainable Node.js backend for the existing YW Vineyard Tracker project while applying the CSE 341 Web Services learning objectives.
+The purpose of this work is to build a maintainable, full-featured RESTful Node.js backend for the existing YW Vineyard Tracker project while applying and fulfilling the **CSE 341 Week 02 Web Services learning objectives**.
 
 The backend demonstrates:
 
-- Node.js server development
-- Express API architecture
-- secure MongoDB Atlas integration
-- environment-variable security
-- routes and controllers
-- GET and POST requests
-- query parameters and HTTP headers
-- JSON request and response bodies
-- REST client testing
-- backend validation and error responses
+*   Node.js server development & Express API architecture
+    
+*   Clean RESTful URI resource hierarchies
+    
+*   Complete HTTP Method implementation (GET, POST, PUT, DELETE)
+    
+*   Full MongoDB CRUD operations using native drivers
+    
+*   Secure MongoDB Atlas integration and environment-variable protection (dotenv)
+    
+*   Decoupled MVC architecture using configuration singletons, routes, controllers, and database models
+    
+*   Interactive API Documentation compliant with OpenAPI 3.0 via **Swagger UI** (swagger-ui-express)
+    
+*   Automated linting and code formatting using **ESLint** and **Prettier**
+    
+*   Strict state machine lifecycle validation, preventing double approvals and direct re-reviews without student resubmissions
+    
 
-## 3. Project Goals
+3\. Project Goals
+-----------------
 
 The completed backend should:
 
-1. Provide a reliable API for the React frontend.
-2. Store member game state in MongoDB Atlas.
-3. Store and process daily progress reports.
-4. Allow administrators to approve or reject reports.
-5. Apply project reward and penalty rules consistently.
-6. Keep database credentials out of the source code and GitHub.
-7. Use a clear architecture that future students can understand and extend.
-8. Provide a foundation for future reporting, admin, and group-activity features.
+1.  Provide a reliable, documented REST API for the React frontend.
+    
+2.  Store and manage member game state (member\_status) and daily progress reports (reports) in MongoDB Atlas.
+    
+3.  Allow full CRUD capabilities across all primary resources (GET, POST, PUT, DELETE).
+    
+4.  Allow leaders/teachers to review pending reports, awarding estimated oil droplets to member balances upon approval without double-granting rewards.
+    
+5.  Provide a student resubmission flow where updating a rejected report resets its status to pending for re-evaluation.
+    
+6.  Keep database credentials out of source control using .env and .gitignore.
+    
+7.  Maintain automated code quality standards via ESLint and Prettier.
+    
+8.  Expose an interactive visual documentation interface via Swagger UI (/api-docs).
+    
 
-## 4. Scope of Work
+4\. Scope of Work
+-----------------
 
 ### Included in this backend phase
 
-- Create the `server` package inside the existing React project.
-- Configure Node.js and CommonJS for the backend.
-- Install Express, MongoDB, dotenv, and cors.
-- Connect securely to MongoDB Atlas.
-- Store the connection string in `server/.env`.
-- Protect environment files with `.gitignore`.
-- Organize the backend into config, controllers, and routes.
-- Create the Express server entry point.
-- Create a member-status GET endpoint.
-- Support query parameters and custom headers.
-- Create an admin report-review POST endpoint.
-- Validate report-review request bodies.
-- Update report status after an administrative decision.
-- Apply approval rewards to member resources.
-- Apply rejection penalties to lamp oil.
-- Test the backend with Thunder Client.
-- Verify the backend through linting and real MongoDB requests.
+*   **Project Structure & Dependencies:** Configure Node.js, CommonJS, Express, MongoDB native driver, Cors, Dotenv, Axios, and Swagger UI.
+    
+*   **Database Architecture:** Implement a singleton connection pattern in server/config/db.js connecting securely to MongoDB Atlas.
+    
+*   **RESTful Resource Hierarchies & CRUD:**
+    
+    *   **Member Status (/api/status):**
+        
+        *   GET /api/status: Fetch member records with memberId query filtering.
+            
+        *   POST /api/status: Create brand-new member status documents with default resource allocations and duplicate prevention.
+            
+        *   PUT /api/status/:id: Update existing member resource counts (oilInLamp, oilReserve, activityPasses).
+            
+        *   DELETE /api/status/:id: Remove member status records by MongoDB ID or memberId.
+            
+    *   **Reports & Leader Review (/api/reports):**
+        
+        *   GET /api/reports: Fetch pending, approved, or rejected reports with status and memberId filtering.
+            
+        *   POST /api/reports: Submit new daily progress reports in pending status with estimated droplet values.
+            
+        *   PUT /api/reports/:id: Edit summary or estimated droplets on a report, explicitly resetting its status back to pending.
+            
+        *   POST /api/reports/review: Process leader decisions (approved: true/false). Enforces guard clauses to only allow reviewing pending reports and awards estimated droplets to oilInLamp upon approval.
+            
+        *   DELETE /api/reports/:id: Remove specific report records by ID or reportId.
+            
+*   **Interactive Documentation:** Create an OpenAPI 3.0 specification (server/swagger.json) mounted at /api-docs.
+    
+*   **Automated Integration Testing:** Comprehensive end-to-end API test script (server/test-api.js) verifying status creation, report submission, approval balance updates, double-approval prevention, rejection cycles, and resubmissions.
+    
 
 ### Not included in this phase
 
-- Complete frontend-to-backend state synchronization
-- Authentication and authorization for administrators
-- Production deployment to Render
-- Full database schema validation
-- All future group, Sunday reporting, and Young Men features
-- Final production security hardening
+*   User authentication (JWT/OAuth) and role-based access control (RBAC).
+    
+*   Production deployment to hosting platforms (e.g., Render/Railway).
+    
+*   Complex group/ward-level aggregated analytics.
+    
 
-These items can be included in later phases.
+5\. API Endpoints & Business Logic
+----------------------------------
 
-### W01 learning activity boundary
+### 5.1 Server Health Check & Documentation
 
-The W01 activity focuses on building and testing the Node.js web service locally. It does not require a Render deployment for completion. Render deployment is a separate hosting and deployment task that may be completed later when the API needs to be publicly accessible.
+*   GET / — Health check endpoint (YW Vineyard Tracker API is running.).
+    
+*   GET /api-docs — Interactive OpenAPI / Swagger UI interface.
+    
 
-## 5. Backend Functions
+### 5.2 Member Status Endpoints
 
-### 5.1 Server health check
+*   **GET /api/status**: Retrieves member status records. Accepts optional ?memberId= query parameters.
+    
+*   **POST /api/status**: Inserts a new member record into member\_status. Rejects duplicate memberId submissions with 400 Bad Request.
+    
+*   **PUT /api/status/:id**: Updates specific resource fields for a member record matching id or memberId.
+    
+*   **DELETE /api/status/:id**: Deletes a member record from MongoDB matching id or memberId.
+    
 
-The backend provides a route to confirm that the Express server is running:
+### 5.3 Daily Report & Admin Review Endpoints
 
-```text
-GET /
-```
+*   **GET /api/reports**: Retrieves report documents from reports. Supports ?status= and ?memberId= filtering.
+    
+*   **POST /api/reports**: Submits a new member progress report in pending status.
+    
+*   **PUT /api/reports/:id**: Student edits and resubmits a report (updates summary and/or estimated droplets). Automatically resets status to 'pending'.
+    
+*   **POST /api/reports/review**: Evaluates a report (reportId, approved).
+    
+    *   **Guard Clause Validation:** Only reports with status: 'pending' can be reviewed. Attempts to re-review approved or rejected reports directly are rejected with 400 Bad Request.
+        
+    *   **Approval Logic:** Updates report status to approved and safely increments the student's oilInLamp balance by estimatedDroplets.
+        
+    *   **Rejection Logic:** Updates report status to rejected without altering member oil balances.
+        
+*   **DELETE /api/reports/:id**: Removes a report document from MongoDB by id or reportId.
+    
 
-Expected response:
+6\. Report State Machine Workflow
+---------------------------------
 
-```text
-YW Vineyard Tracker API is running.
-```
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   [ Student Submits Report ] ──► status: "pending"                                        │                           ┌────────────┴────────────┐                           ▼                         ▼                    [ Leader Approves ]       [ Leader Rejects ]                           │                         │                           ▼                         ▼                   status: "approved"        status: "rejected"              (+ droplets added to oil)       (0 droplets added)                           │                         │                           │             [ Student Edits & Resubmits ]                           │                         │                           │                         ▼                           └───────────────► status: "pending"                                             (Can now be reviewed again)   `
 
-### 5.2 Member status retrieval
+7\. Technical Architecture
+--------------------------
 
-The backend provides:
+The backend follows a modular, layered MVC architecture:
 
-```text
-GET /api/status
-```
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   server/  ├── config/  │   └── db.js                 # MongoDB connection singleton  ├── controllers/  │   ├── statusController.js   # Member status GET, POST, PUT, DELETE logic  │   └── reportController.js   # Report GET, POST, PUT, REVIEW, DELETE logic  ├── models/  │   ├── statusModel.js       # Database abstraction for member status collection  │   └── reportModel.js       # Database abstraction & review business logic  ├── routes/  │   ├── statusRoutes.js      # Express RESTful route definitions for status  │   └── reportRoutes.js      # Express RESTful route definitions for reports  ├── test-api.js               # Automated Axios integration test suite  ├── swagger.json              # OpenAPI 3.0 specification  ├── .env                      # Database secrets (excluded from Git)  ├── package.json              # Backend dependencies & npm scripts  └── index.js                  # Express entry point & Swagger mounting   `
 
-It:
+8\. Security & Code Quality Standards
+-------------------------------------
 
-- retrieves member-status documents from MongoDB
-- optionally filters by `memberId`
-- reads the `x-client-version` header
-- returns a JSON response
-- returns an error response when the database request fails
+*   MongoDB Atlas credentials remain stored exclusively in server/.env and are strictly excluded from source control via .gitignore.
+    
+*   Password special characters are URL-encoded within connection strings.
+    
+*   Code style and execution standards are verified using ESLint (npx eslint .) and Prettier (npm run format), guaranteeing zero unhandled global errors or syntax warnings.
+    
+*   Full state safety prevents double-awarding droplets or illegal status transition exploits.
+    
 
-Example:
+9\. Learning Activity Alignment (CSE 341 Week 02)
+-------------------------------------------------
 
-```text
-GET /api/status?memberId=123
-```
+This implementation directly fulfills all core learning objectives:
 
-### 5.3 Daily report review
+*   **RESTful URI Hierarchies:** Designed standardized plural resource paths (/api/status, /api/reports).
+    
+*   **Complete HTTP Verbs:** Implemented GET, POST, PUT, and DELETE requests across API endpoints.
+    
+*   **MongoDB CRUD Operations:** Executed native driver methods (findOne, find, insertOne, updateOne, deleteOne) in Node.js.
+    
+*   **API Documentation (Swagger):** Standardized API routes, query params, headers, and request body schemas using OpenAPI 3.0 and swagger-ui-express.
+    
+*   **Code Standardization & Verification:** Enforced consistent style and syntax rules via ESLint, Prettier, and automated integration testing via test-api.js.
+    
 
-The backend provides:
+10\. Deliverables
+-----------------
 
-```text
-POST /api/reports/review
-```
+*   Complete, running server/ Node.js/Express application.
+    
+*   Native MongoDB Atlas singleton module (server/config/db.js).
+    
+*   Complete RESTful models, controllers, and routes supporting full CRUD workflows.
+    
+*   OpenAPI specification (server/swagger.json) and live Swagger UI endpoint (/api-docs).
+    
+*   Automated integration test suite (server/test-api.js).
+    
+*   Configured ESLint setup and package scripts (npm run lint, npm run lint:fix).
+    
+*   Updated documentation files (server-setup.md, demonstrated-skills.md, server-statement-of-work.md).
+    
 
-The request body contains:
-
-```json
-{
-  "reportId": "report-123",
-  "approved": true
-}
-```
-
-The endpoint:
-
-1. Validates `reportId` and `approved`.
-2. Finds the report only when its status is `pending`.
-3. Finds the related member using `memberId`.
-4. If approved, generates an outcome using the project reward rules.
-5. If rejected, subtracts the claimed droplets from `oilInLamp`.
-6. Updates the report status.
-7. Stores the approval reward on the report when applicable.
-8. Returns the result as JSON.
-
-### 5.4 Approval reward rules
-
-The reward logic follows the main project SOW and existing frontend game logic:
-
-- 70% chance of an oil bonus added to `oilReserve`
-- 30% chance of a talent-family reward
-- talent-family rewards may be talent droplets or real talents
-- rarity levels are common, uncommon, and rare
-- a gold real talent also increases `activityPasses`
-
-Member resource fields are:
-
-```json
-{
-  "oilInLamp": 10,
-  "oilReserve": 50,
-  "activityPasses": 0,
-  "talentDroplets": {
-    "red": 0,
-    "blue": 0,
-    "gold": 0
-  },
-  "talents": {
-    "red": 0,
-    "blue": 0,
-    "gold": 0
-  }
-}
-```
-
-### 5.5 Rejection rules
-
-When a report is rejected, the claimed amount is removed from `oilInLamp`. The value cannot fall below zero.
-
-The report is marked:
-
-```text
-rejected
-```
-
-## 6. Technical Architecture
-
-The backend uses a layered structure:
-
-```text
-server/
-├── config/
-│   └── db.js
-├── controllers/
-│   ├── trackerController.js
-│   └── reviewController.js
-├── routes/
-│   └── trackerRoutes.js
-├── .env
-├── package.json
-└── server.js
-```
-
-### Configuration layer
-
-`server/config/db.js` owns the MongoDB connection and exports reusable database functions.
-
-### Controller layer
-
-Controllers contain request handling and business logic. They do not define URL paths.
-
-### Route layer
-
-Routes define the HTTP methods and paths, then forward requests to controllers.
-
-### Server layer
-
-`server/server.js` configures middleware, mounts routes, connects to MongoDB, and starts the HTTP server.
-
-## 7. Security Requirements
-
-- MongoDB credentials must be stored in `server/.env`.
-- `.env` files must be listed in `.gitignore`.
-- Credentials must never be committed to GitHub.
-- The MongoDB database user must be separate from the Atlas website login.
-- Password special characters must be URL-encoded in the connection string.
-- The backend must use environment variables rather than hardcoded secrets.
-
-## 8. Learning Activity Alignment
-
-This work completes the following CSE 341 objectives:
-
-- build a Node.js web service
-- connect Node.js securely to MongoDB
-- move database connection logic into a separate file
-- organize an API with routes and controllers
-- create GET and POST requests
-- use query parameters
-- use HTTP headers
-- process JSON request bodies
-- test requests with a REST client
-- debug and verify a Node.js application
-
-## 9. Deliverables
-
-The backend phase delivers:
-
-- a working `server` package
-- a configured Express application
-- a secure MongoDB Atlas connection
-- a member-status endpoint
-- an admin report-review endpoint
-- controllers for status and review logic
-- route definitions for the API
-- protected environment configuration
-- REST client test evidence
-- setup and troubleshooting documentation
-
-## 10. Acceptance Criteria
+11\. Acceptance Criteria
+------------------------
 
 The backend work is accepted when:
 
-- Node.js starts the backend without configuration errors
-- MongoDB Atlas connects successfully
-- the health-check route returns a response
-- `/api/status` returns JSON
-- `memberId` filters member-status results
-- `x-client-version` is returned in the response
-- the review endpoint validates its JSON body
-- pending reports can be approved or rejected
-- approved reports update member resources
-- rejected reports apply the oil penalty
-- API behavior can be verified with Thunder Client
-- secrets remain excluded from Git
+1.  Server starts without errors via Express.
+    
+2.  MongoDB Atlas establishes a successful connection pool.
+    
+3.  Health check (GET /) returns a 200 status message.
+    
+4.  Member status endpoints successfully execute GET, POST, PUT, and DELETE operations.
+    
+5.  Report endpoints successfully execute GET, POST, PUT, POST /review, and DELETE operations.
+    
+6.  Guard clauses block re-reviewing already approved or rejected reports directly with 400 Bad Request.
+    
+7.  Student updates via PUT /api/reports/:id reset report status to pending.
+    
+8.  Automated API integration test (node test-api.js) completes all 10 step assertions successfully.
+    
+9.  Terminal command npm run lint executes with **0 errors**.
+    
 
-## 11. Proof of Completed Work
+12\. Proof of Completed Work
+----------------------------
 
-The following work has been completed and verified during development.
+### Server & Database Initialization
 
-### Server and database
+Plaintext
 
-```text
-MongoDB Connected Successfully
-Server active on http://localhost:5000
-```
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   MongoDB Connected Successfully  Server active on http://localhost:5000  Swagger Docs available at http://localhost:5000/api-docs   `
 
-### Member status API
+### Integration Test Suite Output (node test-api.js)
 
-The status endpoint returned successful JSON responses and accepted:
+Plaintext
 
-```text
-GET /api/status?memberId=123
-Header: x-client-version: 1.0.0
-```
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   ========== STARTING API INTEGRATION TESTS ==========  1. Testing POST /api/status for memberId: test-user-1790210863476...  ✔ PASS: Member status created successfully.  2. Testing duplicate POST /api/status (Should fail with 400)...  ✔ PASS: Duplicate member creation correctly rejected with 400 Bad Request.  3. Testing POST /api/reports...  ✔ PASS: Progress report created with ID: report-1790210863883  4. Testing GET /api/reports?memberId=test-user-1790210863476...  ✔ PASS: Retrieved 1 pending report(s).  5. Testing POST /api/reports/review (Approving 15 droplets)...  ✔ PASS: Report successfully approved.  6. Testing GET /api/status?memberId=test-user-1790210863476 (Verifying oil update)...  ✔ PASS: Oil balance correctly increased to 25! (Current balance: 25)  7. Testing POST /api/reports/review on already approved report (Should fail)...  ✔ PASS: Double approval correctly blocked with 400 Bad Request.  8. Creating a 2nd report to test rejection flow...     Rejecting report report-1790210864561...  ✔ PASS: Report successfully rejected without awarding oil.  ✔ PASS: Oil balance verified unchanged (still 25).  9. Testing PUT /api/reports/report-1790210864561 (Student edits & resubmits rejected report)...  ✔ PASS: Report successfully updated and status reset to pending.     Re-reviewing (approving) the resubmitted report...  ✔ PASS: Resubmitted report approved!  ✔ PASS: Final oil balance correctly updated to 37!  10. Cleaning up test records...  ✔ PASS: Test data cleaned up successfully.  ==================================================  ALL API INTEGRATION TESTS COMPLETED SUCCESSFULLY!  ==================================================   `
 
-### Review API
+### Code Verification Output
 
-The report-review endpoint successfully returned:
+Plaintext
 
-```json
-{
-  "success": true,
-  "reportId": "report-123",
-  "status": "approved",
-  "reward": {
-    "category": "oil",
-    "rarity": "common",
-    "amount": 20
-  }
-}
-```
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   PS G:\Projects\yw-vineyard-tracker\server> npm run lint  > server@1.0.0 lint  > eslint .  (0 errors, 0 warnings)   `
 
-MongoDB verification showed that the report status changed to `approved` and the member's oil reserve increased for the test.
+13\. Conclusion
+---------------
 
-The backend lint check also completed with no errors:
-
-```powershell
-cd "G:\Projects\yw-vineyard-tracker"
-npx eslint server/**/*.js
-```
-
-## 12. Future Work
-
-Future backend phases may include:
-
-- authentication and admin authorization
-- frontend API integration
-- report creation from submitted daily progress
-- daily report expiration and cleanup
-- Sunday reporting
-- peer-to-peer support data
-- key and group-activity APIs
-- production deployment to Render
-
-Render is therefore recorded as future deployment work, not as a required part of the W01 local Web Services and Node Architecture activity.
-
-## Conclusion
-
-This Statement of Work defines the backend work for the YW Vineyard Tracker from its purpose through its functions, architecture, security requirements, deliverables, acceptance criteria, and proof of completion. Troubleshooting details remain documented separately in `server-errors-solved.md`.
+This Statement of Work reflects the complete backend design and implementation for the YW Vineyard Tracker API, fulfilling all CSE 341 Week 02 RESTful web service, MongoDB CRUD, code formatting, state machine validation, and Swagger documentation requirements.

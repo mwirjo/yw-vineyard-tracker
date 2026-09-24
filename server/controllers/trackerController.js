@@ -1,76 +1,76 @@
-const { ObjectId } = require('mongodb');
-const { getDB } = require('../config/db');
+const MemberStatusModel = require('../models/memberStatusModel');
 
-// GET /api/status - Returns status info
-const getMemberStatus = async (req, res) => {
+// GET /api/status - Retrieve all member statuses or filter by memberId
+exports.getMemberStatus = async (req, res) => {
   try {
-    const db = getDB();
     const { memberId } = req.query;
-    const clientVersion = req.headers['x-client-version'];
+    const records = await MemberStatusModel.getAll(memberId);
 
-    const query = memberId ? { memberId } : {};
-    const status = await db.collection('member_status').find(query).toArray();
+    if (memberId && records.length === 0) {
+      return res.status(404).json({ success: false, error: 'Member status record not found.' });
+    }
 
-    res.status(200).json({
-      success: true,
-      clientVersionReceived: clientVersion || 'none',
-      data: status
+    res.status(200).json({ success: true, data: records });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// POST /api/status - Create a new member status document
+exports.createMemberStatus = async (req, res) => {
+  try {
+    const { memberId, oilInLamp, oilReserve, activityPasses, talentDroplets, talents } = req.body;
+
+    if (!memberId) {
+      return res.status(400).json({ success: false, error: 'Missing required field: memberId' });
+    }
+
+    const newRecord = await MemberStatusModel.create({
+      memberId,
+      oilInLamp,
+      oilReserve,
+      activityPasses,
+      talentDroplets,
+      talents
     });
+
+    res.status(201).json({ success: true, insertedId: newRecord._id, data: newRecord });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, error: error.message });
   }
 };
 
-// PUT /api/status/:id - Update member status details (PUT)
-const updateMemberStatus = async (req, res) => {
+// PUT /api/status/:id - Update member status by ID or memberId
+exports.updateMemberStatus = async (req, res) => {
   try {
-    const db = getDB();
     const { id } = req.params;
-    const { oilInLamp, oilReserve, activityPasses } = req.body;
+    const updateData = req.body;
 
-    const filter = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { memberId: id };
-    const updateDoc = {
-      $set: {
-        ...(oilInLamp !== undefined && { oilInLamp }),
-        ...(oilReserve !== undefined && { oilReserve }),
-        ...(activityPasses !== undefined && { activityPasses }),
-        updatedAt: new Date()
-      }
-    };
+    const updated = await MemberStatusModel.updateById(id, updateData);
 
-    const result = await db.collection('member_status').updateOne(filter, updateDoc);
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ success: false, error: 'Member status record not found.' });
+    if (!updated) {
+      return res.status(404).json({ success: false, error: `Record with ID/memberId '${id}' not found.` });
     }
 
-    res.status(204).send(); // 204 No Content for successful PUT
+    res.status(200).json({ success: true, message: 'Member status updated successfully.' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// DELETE /api/status/:id - Delete member status record (DELETE)
-const deleteMemberStatus = async (req, res) => {
+// DELETE /api/status/:id - Delete a member status document
+exports.deleteMemberStatus = async (req, res) => {
   try {
-    const db = getDB();
     const { id } = req.params;
+    const deleted = await MemberStatusModel.deleteById(id);
 
-    const filter = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { memberId: id };
-    const result = await db.collection('member_status').deleteOne(filter);
-
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ success: false, error: 'Member status record not found.' });
+    if (!deleted) {
+      return res.status(404).json({ success: false, error: `Record with ID/memberId '${id}' not found.` });
     }
 
-    res.status(200).json({ success: true, message: 'Member status record deleted successfully.' });
+    res.status(200).json({ success: true, message: 'Record deleted successfully.' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
-};
-
-module.exports = {
-  getMemberStatus,
-  updateMemberStatus,
-  deleteMemberStatus
 };

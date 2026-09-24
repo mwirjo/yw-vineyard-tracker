@@ -1,0 +1,448 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "YW Vineyard Tracker API",
+    "version": "1.0.0",
+    "description": "API documentation for managing Young Women's vineyard member status, daily progress reports, reward systems, and administrative reviews."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local Development Server"
+    }
+  ],
+  "tags": [
+    { "name": "System", "description": "Health checks and system monitoring" },
+    { "name": "Member Status", "description": "Manage individual member oil levels and activity passes" },
+    { "name": "Progress Reports", "description": "Submit, retrieve, update, and review daily progress reports" }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Health check",
+        "description": "Verifies that the server is active and responding to HTTP requests.",
+        "operationId": "getHealthCheck",
+        "responses": {
+          "200": {
+            "description": "Server is running smoothly",
+            "content": {
+              "application/json": {
+                "example": { "status": "ok", "message": "Server is running" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/status": {
+      "get": {
+        "tags": ["Member Status"],
+        "summary": "Get member status",
+        "description": "Retrieves member status records. Can be filtered by a specific member ID.",
+        "operationId": "getMemberStatus",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Filter results by a specific member ID",
+            "example": "456"
+          },
+          {
+            "name": "x-client-version",
+            "in": "header",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Client application version for compatibility validation",
+            "example": "1.2.0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved member status list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/MemberStatus" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Member Status"],
+        "summary": "Create new member status document",
+        "description": "Initializes a new status record for a member with oil reserves and activity passes.",
+        "operationId": "createMemberStatus",
+        "requestBody": {
+          "required": true,
+          "description": "Member status configuration payload",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MemberStatusInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Member status created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MemberStatus" }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields or invalid payload format",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": { "error": "Missing required field: memberId" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/status/{id}": {
+      "put": {
+        "tags": ["Member Status"],
+        "summary": "Update member status by ID",
+        "description": "Updates existing lamp oil levels, reserves, or activity passes using either the document ID or member ID.",
+        "operationId": "updateMemberStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The unique record ID or member ID",
+            "example": "64f1a2b3c4d5e6f7"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Fields to update in the member status record",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "oilInLamp": { "type": "number", "description": "Current oil amount in the active lamp", "example": 15 },
+                  "oilReserve": { "type": "number", "description": "Backup oil reserve count", "example": 30 },
+                  "activityPasses": { "type": "number", "description": "Available passes for activities", "example": 2 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Member status updated successfully" },
+          "404": {
+            "description": "Member status record not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" },
+                "example": { "error": "Record with ID 64f1a2b3c4d5e6f7 not found" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Member Status"],
+        "summary": "Delete member status record",
+        "description": "Permanently removes a member status document from the database.",
+        "operationId": "deleteMemberStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The unique record ID or member ID to delete",
+            "example": "64f1a2b3c4d5e6f7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted successfully",
+            "content": {
+              "application/json": {
+                "example": { "message": "Record deleted successfully" }
+              }
+            }
+          },
+          "404": {
+            "description": "Record not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports": {
+      "get": {
+        "tags": ["Progress Reports"],
+        "summary": "Get progress reports",
+        "description": "Fetches progress reports with options to filter by member ID or approval status.",
+        "operationId": "getReports",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Filter reports by member ID",
+            "example": "456"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["pending", "approved", "rejected"]
+            },
+            "description": "Filter by review status",
+            "example": "pending"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved reports",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ProgressReport" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Progress Reports"],
+        "summary": "Submit a new daily progress report",
+        "description": "Submits daily completed goals and estimated oil droplet earnings for leader review. Rewards remain pending until approved.",
+        "operationId": "submitReport",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProgressReportInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Report submitted successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProgressReport" }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing memberId or invalid report details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/review": {
+      "post": {
+        "tags": ["Progress Reports"],
+        "summary": "Review and process a member progress report",
+        "description": "Admin endpoint to approve or reject a report. Approving credits the claimed droplets to the member's oilInLamp balance. Rejecting updates status without deducting droplets.",
+        "operationId": "reviewReport",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["reportId", "approved"],
+                "properties": {
+                  "reportId": { "type": "string", "description": "ID of the report to review", "example": "report-123" },
+                  "approved": { "type": "boolean", "description": "Approval decision", "example": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Report processed successfully",
+            "content": {
+              "application/json": {
+                "example": { "message": "Report approved and oil status updated." }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body or missing parameters",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Report or Member not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/{id}": {
+      "put": {
+        "tags": ["Progress Reports"],
+        "summary": "Update and resubmit a progress report",
+        "description": "Allows a student to edit a rejected or existing report. Resets the report status back to 'pending' for leader re-review.",
+        "operationId": "updateReport",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The unique report ID to update",
+            "example": "report-123"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "estimatedDroplets": { "type": "number", "example": 20 },
+                  "summary": { "type": "string", "example": "Updated summary with missing tasks added." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Report updated and status reset to pending",
+            "content": {
+              "application/json": {
+                "example": { "message": "Report updated and resubmitted as pending." }
+              }
+            }
+          },
+          "404": {
+            "description": "Report not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Progress Reports"],
+        "summary": "Delete a report by ID",
+        "description": "Removes a progress report from the system.",
+        "operationId": "deleteReport",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The unique report ID to delete",
+            "example": "report-123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report deleted successfully",
+            "content": {
+              "application/json": {
+                "example": { "message": "Report deleted successfully" }
+              }
+            }
+          },
+          "404": {
+            "description": "Report not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MemberStatusInput": {
+        "type": "object",
+        "required": ["memberId"],
+        "properties": {
+          "memberId": { "type": "string", "description": "Unique identifier for the member", "example": "456" },
+          "oilInLamp": { "type": "number", "description": "Amount of oil currently in the active lamp", "example": 10 },
+          "oilReserve": { "type": "number", "description": "Backup reserve oil count", "example": 25 },
+          "activityPasses": { "type": "number", "description": "Earned passes for upcoming activities", "example": 0 }
+        }
+      },
+      "MemberStatus": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "description": "Database object ID", "example": "64f1a2b3c4d5e6f7" },
+          "memberId": { "type": "string", "description": "Unique identifier for the member", "example": "456" },
+          "oilInLamp": { "type": "number", "example": 10 },
+          "oilReserve": { "type": "number", "example": 25 },
+          "activityPasses": { "type": "number", "example": 0 }
+        }
+      },
+      "ProgressReportInput": {
+        "type": "object",
+        "required": ["memberId"],
+        "properties": {
+          "memberId": { "type": "string", "description": "Unique identifier for the reporting member", "example": "456" },
+          "estimatedDroplets": { "type": "number", "description": "Estimated oil droplets earned", "example": 15 },
+          "summary": { "type": "string", "description": "Brief description of spiritual/personal goals completed", "example": "Completed scriptures reading and project task." }
+        }
+      },
+      "ProgressReport": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "report-123" },
+          "memberId": { "type": "string", "example": "456" },
+          "estimatedDroplets": { "type": "number", "example": 15 },
+          "summary": { "type": "string", "example": "Completed spiritual goal" },
+          "status": { "type": "string", "enum": ["pending", "approved", "rejected"], "example": "pending" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string", "description": "Error details message", "example": "Resource not found" }
+        }
+      }
+    }
+  }
+}
